@@ -1,15 +1,8 @@
 package connectFourNew;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
-
-
-public class ConnectFour {
-	
-	private static int globalCount = 0;
-
-	
+public class ConnectFour {	
 	public static void main(String[] args) {
 		//maximizing the player == RED
 		//minimizing the player == YELLOW
@@ -17,7 +10,7 @@ public class ConnectFour {
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 400;
+        int depth = 2;
 
         while (!board.isGameOver()) {
             int column;
@@ -43,15 +36,20 @@ public class ConnectFour {
 	
     public static int getBestMove(Board board, int depth) {
         int bestMove = -1;
-        int bestValue = Integer.MIN_VALUE;
+        int bestValue = Integer.MIN_VALUE; //var först min
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
+        
+        Board copyBoard = board.clone();
 
         for (int column = 0; column < board.COLUMNS; column++) {
-            if (board.isValidMove(column)) {
-                board.makeMove(column, board.isRedTurn);
-                int value = min(board, depth - 1, alpha, beta);
-                board.undoMove(column);
+            Board currentBoard = copyBoard.clone(); // Create a new instance from the copied board
+            if (currentBoard.isValidMove(column)) {
+                currentBoard.makeMove(column, currentBoard.isRedTurn);
+                int value = min(currentBoard, depth - 1, alpha, beta);
+                currentBoard.undoMove(column);
+
+                System.out.println("Col nbr: " + column + " Value: " + value + " BestValue: " + bestValue);
 
                 if (value > bestValue) {
                     bestValue = value;
@@ -65,8 +63,6 @@ public class ConnectFour {
 
     private static int max(Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isGameOver()) {
-            // Evaluate the board state here
-            // Return a heuristic value or perform a more advanced evaluation
             return evaluate(board);
         }
 
@@ -77,8 +73,6 @@ public class ConnectFour {
                 board.makeMove(column, board.isRedTurn);
                 value = Math.max(value, min(board, depth - 1, alpha, beta));
                 board.undoMove(column);
-                System.out.println("Max happened");
-                
                 alpha = Math.max(alpha, value);
                 if (alpha >= beta) {
                     break;
@@ -90,8 +84,6 @@ public class ConnectFour {
 
     private static int min(Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isGameOver()) {
-            // Evaluate the board state here
-            // Return a heuristic value or perform a more advanced evaluation
             return evaluate(board);
         }
 
@@ -102,8 +94,6 @@ public class ConnectFour {
                 board.makeMove(column, !board.isRedTurn);
                 value = Math.min(value, max(board, depth - 1, alpha, beta));
                 board.undoMove(column);
-                System.out.println("Max happened");
-
                 beta = Math.min(beta, value);
                 if (beta <= alpha) {
                     break;
@@ -205,11 +195,11 @@ public class ConnectFour {
 	}
 	private static int calculateScore(int count, int openEnds) {
 	    if (count == 4) {
-	        return 100; // Four in a row
+	        return 1000; // Four in a row
 	    } else if (count == 3 && openEnds == 0) {
-	        return 10; // Three in a row with both ends closed
+	        return 20; // Three in a row with both ends closed
 	    } else if (count == 3 && openEnds == 1) {
-	        return 5; // Three in a row with one end open
+	        return 10; // Three in a row with one end open
 	    } else if (count == 2 && openEnds == 2) {
 	        return 2; // Two in a row with both ends open
 	    } else {
