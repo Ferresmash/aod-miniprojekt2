@@ -12,15 +12,15 @@ public class ConnectFour {
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 40;
+        int depth = 3;
 
         while (!board.isGameOver()) {
             int column;
             if (isRedTurn) {
-                System.out.print("Red's turn. Enter column (1-7): ");
+                System.out.print("Your's turn. (R) Enter column (1-7): ");
                 column = scanner.nextInt() - 1;
             } else {
-                System.out.println("Yellow's turn (Opponent)");
+                System.out.println("Ai's turn (Y) (Opponent)");
                 column = getBestMove(board.clone(),depth);
                 // Make the best move found by alphaBeta
             }
@@ -104,7 +104,7 @@ public class ConnectFour {
                 value = Math.min(value, max(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 beta = Math.min(beta, value);
-                if (beta <= alpha) {
+                if (beta >= alpha) {
                     break;
                 }
             }
