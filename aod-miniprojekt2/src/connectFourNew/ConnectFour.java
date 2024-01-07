@@ -12,7 +12,7 @@ public class ConnectFour {
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 3;
+        int depth = 8;
 
         while (!board.isGameOver()) {
             int column;
@@ -104,7 +104,7 @@ public class ConnectFour {
                 value = Math.min(value, max(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 beta = Math.min(beta, value);
-                if (beta >= alpha) {
+                if (beta <= alpha) {
                     break;
                 }
             }
@@ -202,17 +202,45 @@ public class ConnectFour {
 
 	    return score;
 	}
+//	private static int calculateScore(int count, int openEnds) {
+//	    if (count == 4) {
+//	        return 100; // Four in a row
+//	    } else if (count == 3 && openEnds == 0) {
+//	        return 5; // Three in a row with both ends closed
+//	    } else if (count == 3 && openEnds == 1) {
+//	        return 3; // Three in a row with one end open
+//	    } else if (count == 2 && openEnds == 2) {
+//	        return 2; // Two in a row with both ends open
+//	    } else {
+//	        return 0; // No significant sequence detected
+//	    }
+//	}
 	private static int calculateScore(int count, int openEnds) {
-	    if (count == 4) {
-	        return 100; // Four in a row
+	    int score = 0;
+	    
+	    // Weighted scores based on the sequence length and open ends
+	    if (count >= 4) {
+	        score += 10000; // Winning move
 	    } else if (count == 3 && openEnds == 0) {
-	        return 5; // Three in a row with both ends closed
+	        score += 500; // Blocked three in a row
 	    } else if (count == 3 && openEnds == 1) {
-	        return 3; // Three in a row with one end open
+	        score += 50; // Potential three in a row with one end open
 	    } else if (count == 2 && openEnds == 2) {
-	        return 2; // Two in a row with both ends open
+	        score += 10; // Two in a row with both ends open
+	    } else if (count == 2 && openEnds == 1) {
+	        score += 5; // Potential two in a row with one end open
+	    } else if (count == 1 && openEnds == 2) {
+	        score += 1; // Single piece with both ends open
+	    
+	    // Encourage center moves to control the board
+	    } else if (count == 1 && openEnds == 1) {
+	        score += 2; // Single piece with one end open
+
+	    // Discourage moves that do not contribute to potential wins
 	    } else {
-	        return 0; // No significant sequence detected
+	        score -= 3; // No significant sequence detected
 	    }
+	    
+	    return score;
 	}
 }
