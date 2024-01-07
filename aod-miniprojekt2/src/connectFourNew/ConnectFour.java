@@ -12,7 +12,7 @@ public class ConnectFour {
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 8;
+        int depth = 40;
 
         while (!board.isGameOver()) {
             int column;
@@ -104,7 +104,7 @@ public class ConnectFour {
                 value = Math.min(value, max(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 beta = Math.min(beta, value);
-                if (beta >= alpha) {
+                if (beta <= alpha) {
                     break;
                 }
             }
