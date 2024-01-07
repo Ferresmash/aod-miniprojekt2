@@ -2,15 +2,17 @@ package connectFourNew;
 
 import java.util.Scanner;
 
-public class ConnectFour {	
+public class ConnectFour {
+	static int globalCount = 0;
 	public static void main(String[] args) {
 		//maximizing the player == RED
 		//minimizing the player == YELLOW
+		
 		Board board = new Board();
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 2;
+        int depth = 8;
 
         while (!board.isGameOver()) {
             int column;
@@ -36,7 +38,7 @@ public class ConnectFour {
 	
     public static int getBestMove(Board board, int depth) {
         int bestMove = -1;
-        int bestValue = Integer.MIN_VALUE; //var först min
+        int bestValue = Integer.MIN_VALUE;
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
         
@@ -49,7 +51,7 @@ public class ConnectFour {
                 int value = min(currentBoard, depth - 1, alpha, beta);
                 currentBoard.undoMove(column);
 
-                System.out.println("Col nbr: " + column + " Value: " + value + " BestValue: " + bestValue);
+                //System.out.println("Col nbr: " + column + " Value: " + value + " BestValue: " + bestValue);
 
                 if (value > bestValue) {
                     bestValue = value;
@@ -58,6 +60,7 @@ public class ConnectFour {
                 alpha = Math.max(alpha, bestValue);
             }
         }
+        System.out.println(globalCount);
         return bestMove;
     }
 
@@ -67,6 +70,9 @@ public class ConnectFour {
         }
 
         int value = Integer.MIN_VALUE;
+        
+        globalCount++;
+        //System.out.println("globalCount: " + globalCount);
 
         for (int column = 0; column < board.COLUMNS; column++) {
             if (board.isValidMove(column)) {
@@ -74,7 +80,7 @@ public class ConnectFour {
                 value = Math.max(value, min(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 alpha = Math.max(alpha, value);
-                if (alpha >= beta) {
+                if (alpha <= beta) {
                     break;
                 }
             }
@@ -88,6 +94,9 @@ public class ConnectFour {
         }
 
         int value = Integer.MAX_VALUE;
+        
+        globalCount++;
+        //System.out.println("globalCount: " + globalCount);
 
         for (int column = 0; column < board.COLUMNS; column++) {
             if (board.isValidMove(column)) {
@@ -95,7 +104,7 @@ public class ConnectFour {
                 value = Math.min(value, max(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 beta = Math.min(beta, value);
-                if (beta <= alpha) {
+                if (beta >= alpha) {
                     break;
                 }
             }
@@ -195,11 +204,11 @@ public class ConnectFour {
 	}
 	private static int calculateScore(int count, int openEnds) {
 	    if (count == 4) {
-	        return 1000; // Four in a row
+	        return 100; // Four in a row
 	    } else if (count == 3 && openEnds == 0) {
-	        return 20; // Three in a row with both ends closed
+	        return 5; // Three in a row with both ends closed
 	    } else if (count == 3 && openEnds == 1) {
-	        return 10; // Three in a row with one end open
+	        return 3; // Three in a row with one end open
 	    } else if (count == 2 && openEnds == 2) {
 	        return 2; // Two in a row with both ends open
 	    } else {
