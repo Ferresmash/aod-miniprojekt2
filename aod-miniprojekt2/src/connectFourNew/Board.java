@@ -37,6 +37,7 @@ public class Board implements Cloneable {
     public boolean isValidMove(int column) {
         return column >= 0 && column < COLUMNS && board[0][column] == ' ';
     }
+    
 
     public void makeMove(int column, boolean isRed) {
         if (isValidMove(column)) {

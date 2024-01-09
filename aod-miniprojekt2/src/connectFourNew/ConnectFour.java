@@ -3,7 +3,8 @@ package connectFourNew;
 import java.util.Scanner;
 
 public class ConnectFour {
-	static int globalCount = 0;
+	static int globalDepthCount = 0;
+	static int evaluationCount = 0;
 	public static void main(String[] args) {
 		//maximizing the player == RED
 		//minimizing the player == YELLOW
@@ -12,7 +13,7 @@ public class ConnectFour {
         board.printBoard();
         Scanner scanner = new Scanner(System.in);
         boolean isRedTurn = true;
-        int depth = 8;
+        int depth = 1000;
 
         while (!board.isGameOver()) {
             int column;
@@ -22,9 +23,9 @@ public class ConnectFour {
             } else {
                 System.out.println("Ai's turn (Y) (Opponent)");
                 column = getBestMove(board.clone(),depth);
+                
                 // Make the best move found by alphaBeta
             }
-
             if (board.isValidMove(column)) {
                 board.makeMove(column, isRedTurn);
                 board.printBoard();
@@ -36,43 +37,53 @@ public class ConnectFour {
         scanner.close();
     }
 	
-    public static int getBestMove(Board board, int depth) {
-        int bestMove = -1;
-        int bestValue = Integer.MIN_VALUE;
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
-        
-        Board copyBoard = board.clone();
 
-        for (int column = 0; column < board.COLUMNS; column++) {
-            Board currentBoard = copyBoard.clone(); // Create a new instance from the copied board
-            if (currentBoard.isValidMove(column)) {
-                currentBoard.makeMove(column, currentBoard.isRedTurn);
-                int value = min(currentBoard, depth - 1, alpha, beta);
-                currentBoard.undoMove(column);
+	
+	public static int getBestMove(Board board, int depth) {
+		int bestMove = -1;
+		int bestValue = Integer.MIN_VALUE;
+		int alpha = Integer.MIN_VALUE;
+		int beta = Integer.MAX_VALUE;
 
-                //System.out.println("Col nbr: " + column + " Value: " + value + " BestValue: " + bestValue);
+		Board copyBoard = board.clone();
 
-                if (value > bestValue) {
-                    bestValue = value;
-                    bestMove = column;
-                }
-                alpha = Math.max(alpha, bestValue);
-            }
-        }
-        System.out.println(globalCount);
-        return bestMove;
-    }
+		for (int column = 0; column < board.COLUMNS; column++) {
+			Board currentBoard = copyBoard.clone();
+			globalDepthCount = 0;
 
+			if (currentBoard.isValidMove(column)) {
+				currentBoard.makeMove(column, currentBoard.isRedTurn);
+
+				depth++;
+				int value = max(currentBoard, depth - 1, alpha, beta);
+				currentBoard.undoMove(column);
+				if (value > bestValue) {
+					bestValue = value;
+					bestMove = column;
+				}
+				System.out.println("Col" + column + " value: " + value + "best value: " + bestValue + " minmaxCount:" + globalDepthCount
+						+ " evaluationCount: " + evaluationCount);
+				alpha = Math.min(beta, bestValue);
+
+				depth--;
+			}
+		}
+
+		System.out.println(globalDepthCount);
+		return bestMove;
+	}
+
+	
     private static int max(Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isGameOver()) {
+        	//System.out.println("went out max: " + (depth==0) + board.isBoardFull() + board.checkWinner());
             return evaluate(board);
         }
+        System.out.println("max: depth: "+depth);
+        globalDepthCount++;
 
         int value = Integer.MIN_VALUE;
         
-        globalCount++;
-        //System.out.println("globalCount: " + globalCount);
 
         for (int column = 0; column < board.COLUMNS; column++) {
             if (board.isValidMove(column)) {
@@ -80,23 +91,25 @@ public class ConnectFour {
                 value = Math.max(value, min(board, depth - 1, alpha, beta));
                 board.undoMove(column);
                 alpha = Math.max(alpha, value);
-                if (alpha <= beta) {
+                if (beta <= alpha) {
                     break;
                 }
             }
         }
         return value;
     }
-
+    
     private static int min(Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isGameOver()) {
+        	//System.out.println("went out min: " + (depth==0) + board.isBoardFull() + board.checkWinner());
             return evaluate(board);
         }
 
         int value = Integer.MAX_VALUE;
         
-        globalCount++;
-        //System.out.println("globalCount: " + globalCount);
+        System.out.println("min: depth: "+depth);
+        
+        globalDepthCount++;
 
         for (int column = 0; column < board.COLUMNS; column++) {
             if (board.isValidMove(column)) {
@@ -109,9 +122,83 @@ public class ConnectFour {
                 }
             }
         }
+        
         return value;
     }
-
+    
+//    public static int getBestMove(Board board, int depth) {
+//
+//        int bestMove = -1;
+//        int bestValue = Integer.MIN_VALUE;
+//
+//        Board copyBoard = board.clone();
+//
+//        for (int column = 0; column < board.COLUMNS; column++) {
+//            Board currentBoard = copyBoard.clone();
+//            globalDepthCount = 0;
+//
+//            if (currentBoard.isValidMove(column)) {
+//                currentBoard.makeMove(column, currentBoard.isRedTurn);
+//
+//                depth++;
+//                int value = min(currentBoard, depth - 1);
+//                currentBoard.undoMove(column);
+//                if (value > bestValue) {
+//                    bestValue = value;
+//                    bestMove = column;
+//                }
+//                System.out.println("Col" + column + " value: " + value + "best value: " + bestValue + " minmaxCount:" + globalDepthCount
+//                        + " evaluationCount: " + evaluationCount);
+//
+//                depth--;
+//            }
+//        }
+//
+//        System.out.println(globalDepthCount);
+//        return bestMove;
+//    }
+//
+//    private static int max(Board board, int depth) {
+//        if (depth == 0 || board.isGameOver()) {
+//            System.out.println("went out max: " + (depth == 0) + board.isBoardFull() + board.checkWinner());
+//            return evaluate(board);
+//        }
+//        globalDepthCount++;
+//
+//        int value = Integer.MIN_VALUE;
+//
+//        for (int column = 0; column < board.COLUMNS; column++) {
+//            if (board.isValidMove(column)) {
+//                board.makeMove(column, board.isRedTurn);
+//                value = Math.max(value, min(board, depth - 1));
+//                board.undoMove(column);
+//            }
+//        }
+//        return value;
+//    }
+//
+//    private static int min(Board board, int depth) {
+//        if (depth == 0 || board.isGameOver()) {
+//            System.out.println("went out min: " + (depth == 0) + board.isBoardFull() + board.checkWinner());
+//            return evaluate(board);
+//        }
+//
+//        int value = Integer.MAX_VALUE;
+//
+//        globalDepthCount++;
+//
+//        for (int column = 0; column < board.COLUMNS; column++) {
+//            if (board.isValidMove(column)) {
+//                board.makeMove(column, !board.isRedTurn);
+//                value = Math.min(value, max(board, depth - 1));
+//                board.undoMove(column);
+//            }
+//        }
+//
+//        return value;
+//    }
+    
+    
 
 	/**
      * Evaluates the given board state based on connected pieces for each player.
@@ -120,6 +207,7 @@ public class ConnectFour {
      * @return The evaluation score based on connected pieces for both players.
      */
 	public static int evaluate(Board board) {
+		evaluationCount++;
 	    int redScore = countConnectedPieces(board, 'R');
 	    int yellowScore = countConnectedPieces(board, 'Y');
 
@@ -202,45 +290,19 @@ public class ConnectFour {
 
 	    return score;
 	}
-//	private static int calculateScore(int count, int openEnds) {
-//	    if (count == 4) {
-//	        return 100; // Four in a row
-//	    } else if (count == 3 && openEnds == 0) {
-//	        return 5; // Three in a row with both ends closed
-//	    } else if (count == 3 && openEnds == 1) {
-//	        return 3; // Three in a row with one end open
-//	    } else if (count == 2 && openEnds == 2) {
-//	        return 2; // Two in a row with both ends open
-//	    } else {
-//	        return 0; // No significant sequence detected
-//	    }
-//	}
 	private static int calculateScore(int count, int openEnds) {
-	    int score = 0;
-	    
-	    // Weighted scores based on the sequence length and open ends
-	    if (count >= 4) {
-	        score += 10000; // Winning move
+	    if (count == 4) {
+	        return 100; // Four in a row
 	    } else if (count == 3 && openEnds == 0) {
-	        score += 500; // Blocked three in a row
+	        return 4; // Three in a row with both ends closed
 	    } else if (count == 3 && openEnds == 1) {
-	        score += 50; // Potential three in a row with one end open
+	        return 3; // Three in a row with one end open
 	    } else if (count == 2 && openEnds == 2) {
-	        score += 10; // Two in a row with both ends open
-	    } else if (count == 2 && openEnds == 1) {
-	        score += 5; // Potential two in a row with one end open
-	    } else if (count == 1 && openEnds == 2) {
-	        score += 1; // Single piece with both ends open
-	    
-	    // Encourage center moves to control the board
-	    } else if (count == 1 && openEnds == 1) {
-	        score += 2; // Single piece with one end open
-
-	    // Discourage moves that do not contribute to potential wins
+	        return 2; // Two in a row with both ends open
 	    } else {
-	        score -= 3; // No significant sequence detected
+	        return 0; // No significant sequence detected
 	    }
-	    
-	    return score;
 	}
+	
+
 }
